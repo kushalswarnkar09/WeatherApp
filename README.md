@@ -7,7 +7,8 @@ The app follows **MVVM architecture** and is designed with a clean and user-frie
 
 ## 📱 Features
 
-- 🌍 Search weather by city name  
+- 🌍 Search weather by city name
+- 🌞 Day & 🌛 Night mode
 - ☁️ Displays current temperature and weather condition  
 - 💧 Humidity and wind speed information  
 - 🔄 Real-time weather data using API  
@@ -21,9 +22,9 @@ The app follows **MVVM architecture** and is designed with a clean and user-frie
 
 - **Language:** Kotlin  
 - **Architecture:** MVVM (Model–View–ViewModel)  
-- **UI:** Jetpack Compose *(use whichever you used)*  
+- **UI:** Jetpack Compose 
 - **Networking:** Retrofit  
-- **API:** OpenWeatherMap API  
+- **API:** WeatherApi.com  
 - **Asynchronous:** Coroutines  
 - **State Handling:** LiveData / StateFlow  
 - **IDE:** Android Studio
@@ -40,7 +41,7 @@ The app follows **MVVM architecture** and is designed with a clean and user-frie
 
 ## 🔑 API Setup
 
-1. Create an account on **OpenWeatherMap**
+1. Create an account on **WeatherApi.com**
 2. Generate your API key
 3. Add the API key in your project:
 
@@ -48,6 +49,11 @@ The app follows **MVVM architecture** and is designed with a clean and user-frie
 
 - **Name:** Kushal Swarnkar
 - **GitHub:** https://github.com/kushalswarnkar09
+
+## 🖼️ Screenshots
+
+![App Screenshots](screenshots/day.png)
+![App Screenshots](screenshots/night.png)
 
 ## ⭐ Support
 If you like this project, please give it a ⭐ on GitHub.
