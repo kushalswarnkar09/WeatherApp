@@ -8,4 +8,7 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="Brownish">#BE6B0303</color>
+    <color name="Ocean">#245BA7</color>
+    <color name="DarkNight">#091028</color>
+    <color name="LightDay">#70AFED</color>
 </resources>

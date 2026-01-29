@@ -1,9 +1,13 @@
 package com.ui.weatherapp
 
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,15 +21,19 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -34,22 +42,29 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import coil.util.CoilUtils.result
 import com.ui.weatherapp.Api.WeatherModel
 
+
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun WeatherUI(viewModel: WeatherViewModel) {
-    var city by remember { mutableStateOf("Dungarpur") }
+    val isNight = false
+    var city by remember { mutableStateOf("") }
     val weatherResult = viewModel.weatherResult.observeAsState()
     val focusManager = LocalFocusManager.current
     val focusRequester = remember { FocusRequester() }
@@ -57,22 +72,42 @@ fun WeatherUI(viewModel: WeatherViewModel) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.LightGray)
+            .background(Color.White)
     ) {
-        Row(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(75.dp)
                 .clip(RoundedCornerShape(bottomStart = 15.dp, bottomEnd = 15.dp))
-                .background(Color.Black)
-
+                .shadow(10.dp)
+                .height(170.dp)
 
         ) {
+            if (!isNight) {
+                Image(
+                    painter = painterResource(R.drawable.map),
+                    modifier = Modifier.fillMaxSize(),
+                    contentDescription = null,
+                    contentScale = ContentScale.FillBounds
+                )
+            } else {
+                Image(
+                    painter = painterResource(R.drawable.nightworld),
+                    modifier = Modifier.fillMaxSize(),
+                    contentDescription = null,
+                    contentScale = ContentScale.FillBounds
+                )
+            }
             Text(
-                "Weather App",
-                color = Color.White,
-                fontSize = 25.sp,
-                modifier = Modifier.padding(top = 40.dp, start = 16.dp)
+                "Weather Today",
+                color = if (!isNight) {
+                    colorResource(R.color.Ocean)
+                } else {
+                    Color.White
+                },
+                fontSize = 22.sp,
+                modifier = Modifier
+                    .padding(start = 16.dp, bottom = 8.dp)
+                    .align(Alignment.BottomStart)
             )
         }
         Row(
@@ -86,19 +121,15 @@ fun WeatherUI(viewModel: WeatherViewModel) {
                     city = it
                 },
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = Color.Black,
-                    unfocusedContainerColor = Color.Black,
-                    disabledContainerColor = Color.Black,
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White,
-                    cursorColor = Color.White
+                    focusedContainerColor = Color.LightGray,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.onPrimary
                 ),
 
                 placeholder = { Text("Search Location", color = Color.Gray) },
+                shape = RoundedCornerShape(20.dp),
                 modifier = Modifier
                     .padding(16.dp, top = 8.dp, end = 8.dp)
                     .weight(1f)
-                    .clip(RoundedCornerShape(20.dp))
                     .focusRequester(focusRequester),
                 keyboardActions = KeyboardActions(
                     onDone = { focusManager.clearFocus() }),
@@ -116,8 +147,7 @@ fun WeatherUI(viewModel: WeatherViewModel) {
                     .height(60.dp)
                     .padding(top = 8.dp, end = 16.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(Color.Black),
-
+                    .background(colorResource(R.color.Ocean)),
                 ) {
                 Icon(
                     imageVector = Icons.Default.Search,
@@ -134,9 +164,17 @@ fun WeatherUI(viewModel: WeatherViewModel) {
             }
 
             is NetworkResponse.Loading -> {
-                CircularProgressIndicator(
-                    color = Color.LightGray, trackColor = Color.Black
-                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(500.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    LinearProgressIndicator(
+                        color = Color.LightGray, trackColor = colorResource(R.color.Ocean)
+                    )
+                }
             }
 
             is NetworkResponse.Error -> {
@@ -155,137 +193,240 @@ fun WeatherUI(viewModel: WeatherViewModel) {
 
 }
 
+
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun WeatherDetails(data: WeatherModel) {
+    val isNight = false
     var textSize by remember { mutableStateOf(24.sp) }
     Spacer(modifier = Modifier.height(8.dp))
     Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .fillMaxSize()
+            .background(
+                brush = if (isNight) {
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color.White,
+                            Color.White,
+                            colorResource(R.color.Ocean),
+                            colorResource(R.color.DarkNight),
+                            Color.Black
+                        )
+                    )
+                } else {
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color.White,
+                            Color.White,
+                            colorResource(R.color.LightDay),
+                            colorResource(R.color.Ocean)
+                        )
+                    )
+                }
+            )
+            .padding(vertical = 8.dp), horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(
             modifier = Modifier
                 .padding(start = 8.dp, end = 8.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .background(Color.Black),
+                .clip(RoundedCornerShape(8.dp)),
             horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.Bottom
         ) {
             Icon(
                 imageVector = Icons.Outlined.LocationOn,
                 contentDescription = "Location",
-                tint = colorResource(R.color.white),
+                tint = colorResource(R.color.Brownish),
                 modifier = Modifier.size(38.dp)
             )
             Spacer(modifier = Modifier.width(2.dp))
             Text(
                 data.location.name,
-                color = Color.White,
+                color = Color.Black,
                 fontWeight = FontWeight.ExtraBold,
                 fontSize = 20.sp
             )
 
             Text(
-                "," + data.location.country,
-                color = Color.Gray,
+                ", " + data.location.country,
+                color = Color.Black,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 18.sp,
                 modifier = Modifier.padding(end = 8.dp)
             )
         }
-        Spacer(modifier = Modifier.height(60.dp))
+        Spacer(modifier = Modifier.height(15.dp))
         Card(
             border = BorderStroke(3.dp, color = Color.Black),
-            colors = CardDefaults.cardColors(
-                containerColor = Color.LightGray,
-                contentColor = Color.Yellow
-            ),
-
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
             elevation = CardDefaults.cardElevation(
                 defaultElevation = 8.dp
-            ),
-
-
-            ) {
-
-            AsyncImage(
-                modifier = Modifier
-                    .size(140.dp)
-                    .padding(top = 16.dp)
-                    .align(Alignment.CenterHorizontally),
-                model = "https:${data.current.condition.icon}".replace("64x64", "128x128"),
-                contentDescription = "Condition"
             )
-            Row(
-                modifier = Modifier
-                    .padding(start = 16.dp, top = 0.dp, end = 16.dp)
-                    .padding(bottom = 16.dp),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.Bottom
-            ) {
-                Text(
-                    "${data.current.temp_c}°C",
-                    color = Color.DarkGray,
-                    fontSize = 30.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Text(",")
-                Text(
-                    data.current.condition.text,
-                    color = Color.DarkGray,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.W200
-                )
-            }
-        }
-        Spacer(modifier = Modifier.height(100.dp))
-        Card(modifier = Modifier
-            .width(300.dp)
-            .height(200.dp)) {
-            Column(
-                modifier = Modifier
-                    .width(300.dp)
-                    .height(200.dp),
-                verticalArrangement = Arrangement.SpaceAround
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+
+            Box(modifier = Modifier.fillMaxWidth()) {
+                if (!isNight) Image(
+                    painter = painterResource(R.drawable.weatherpic), null
+                ) else Image(painter = painterResource(R.drawable.nightpic), null)
+                Column(
+                    modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.End
                 ) {
-                    Column {
-                        Text("Humidity")
-                        Text("${ data.current.humidity }%", fontSize = textSize ,
-                            maxLines = 2, // limit max lines if you want
-                            onTextLayout = { layoutResult ->
-                                // This is where we detect the number of lines
-                                val lineCount = layoutResult.lineCount
-                                textSize = when (lineCount) {
-                                    1 -> 30.sp
-                                    2 -> 20.sp
-                                    else -> 16.sp
-                                } })
+                    AsyncImage(
+                        modifier = Modifier
+                            .size(140.dp)
+                            .padding(top = 16.dp),
+                        model = "https:${data.current.condition.icon}".replace("64x64", "128x128"),
+                        contentDescription = "Condition"
+                    )
+                    Spacer(modifier = Modifier.height(22.dp))
+                    Row(
+                        modifier = Modifier
+                            .padding(start = 16.dp, top = 0.dp, end = 8.dp)
+                            .padding(bottom = 4.dp),
+                        horizontalArrangement = Arrangement.Absolute.Center,
+                        verticalAlignment = Alignment.Bottom
+                    ) {
+                        Text(
+                            "${data.current.temp_c}°C",
+                            color = Color.DarkGray,
+                            fontSize = 30.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Text(", ")
+                        Text(
+                            data.current.condition.text,
+                            color = Color.DarkGray,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Light
+                        )
                     }
-                    Column {
-                        Text("Precip")
-                        Text("${ data.current.precip_mm }mm")
+                    HorizontalDivider(modifier = Modifier
+                        .width(150.dp)
+                        .padding(end = 4.dp), color = Color.Gray)
+                    Spacer(modifier = Modifier.height(15.dp))
+                    Row(verticalAlignment = Alignment.Bottom) {
+                        Icon(
+                            imageVector = Icons.Outlined.LocationOn,
+                            contentDescription = "Location",
+                            tint = colorResource(R.color.Brownish),
+                            modifier = Modifier.size(30.dp)
+                        )
+                        Spacer(modifier = Modifier.width(2.dp))
+                        Text(
+                            data.location.name,
+                            color = Color.Black,
+                            fontWeight = FontWeight.ExtraBold,
+                            fontSize = 20.sp
+                        )
+
+                        Text(
+                            ", " + data.location.country,
+                            color = Color.Black,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 18.sp,
+                            modifier = Modifier.padding(end = 8.dp)
+                        )
                     }
                 }
+            }
+        }
+        Spacer(modifier = Modifier.height(10.dp))
+        Box(modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.Transparent)
+            .padding(8.dp)){
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.Transparent)
+                    .padding(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White.copy(alpha = 0.1f)
+                ),
+                border = BorderStroke(1.dp, Color.White)
+            ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color.Transparent)
+                        .padding(8.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    Column {
-                        Text("Wind")
-                        Text("${ data.current.wind_kph }kph")
+                    Column( modifier = Modifier.padding(top=16.dp)) {
+                        Row {
+                            Icon(Icons.Filled.WaterDrop, null, tint = Color.Blue)
+                            Text("Humidity", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 23.sp)
+                        }
+                        Text(
+                            "${data.current.humidity}%",
+                            color = Color.White,
+                            fontSize = 20.sp, // limit max lines if you want
+                        )
                     }
-                    Column {
-                        Text("Nature")
-                        Text(data.current.condition.text)
+                    VerticalDivider(
+                        modifier = Modifier
+                            .height(70.dp)
+                            .padding(8.dp)
+                    )
+                    Column ( modifier = Modifier.padding(top=16.dp)){
+                        Text("Precipitation", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 23.sp)
+                        Text("${data.current.precip_mm}mm", color = Color.White,fontSize = 20.sp,)
+                    }
+                }
+            }
+        }
+        Box(modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.Transparent)
+            .padding(8.dp)){
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.Transparent)
+                    .padding(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White.copy(alpha = 0.1f)
+                ),
+                border = BorderStroke(1.dp, Color.White)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color.Transparent)
+                        .padding(8.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    Column ( modifier = Modifier.padding(top=16.dp)){
+                        Row {
+                            Icon(Icons.Filled.WaterDrop, null, tint = Color.Blue)
+                            Text("Wind", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 23.sp)
+                        }
+                        Text(
+                            "${data.current.wind_kph}km/h",
+                            color = Color.White,
+                            fontSize = 20.sp, // limit max lines if you want
+                        )
+                    }
+                    VerticalDivider(
+                        modifier = Modifier
+                            .height(70.dp)
+                            .padding(8.dp)
+                    )
+                    Column( modifier = Modifier.padding(top=16.dp)){
+                        Text("Nature", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 23.sp)
+                        Text("${data.current.condition.text}mm", color = Color.White,fontSize = 20.sp)
                     }
                 }
             }
         }
     }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun isNightTime(): Boolean {
+    val hour = java.time.LocalTime.now().hour
+    return hour !in 6..<18
 }
